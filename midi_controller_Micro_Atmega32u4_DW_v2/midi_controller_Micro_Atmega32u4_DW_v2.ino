@@ -13,6 +13,7 @@
 // LIBRARY
 
 #include "MIDIUSB.h"  
+#include "math.h"
 
 // BUTTONS
 const int NButtons = 1; //***  total number of buttons
@@ -43,6 +44,15 @@ boolean potMoving = true; // If the potentiometer is moving
 unsigned long PTime[NPots] = {}; // Previously stored time; delete 0 if 0 pots
 unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the timer was reset; delete 0 if 0 pots
 
+// Motor
+#define Motor_Mid_Value 117
+#define Motor_Range 100
+#define Motor_Pin A0
+#define Exp_Smoothing_Alpha 0.05
+float motorLow, motorHigh ;
+float oneMinusExpSmoothingAlpha ;
+float filteredMotorValue = Motor_Mid_Value ;
+int midiWheelCC ;
 
 // MIDI Assignments 
 byte midiCh = 1; //* MIDI channel to be used
@@ -62,6 +72,11 @@ void setup() {
     pinMode(buttonPin[i], INPUT_PULLUP);
   }
   Serial.begin(9600);
+//  Motor Setup
+  motorLow = Motor_Mid_Value - Motor_Range;
+  motorHigh = Motor_Mid_Value + Motor_Range;
+  oneMinusExpSmoothingAlpha = 1- Exp_Smoothing_Alpha;
+  midiWheelCC = 0 ;
 
 }
 
@@ -176,11 +191,48 @@ void controlChange(byte channel, byte control, byte value) {
 
 //Playhead wheel
 void spinWheel() {
-  int analogWheelValue = analogRead(A0); //* Analog reading from circuit
-  int mappedWheelValue = map(analogWheelValue, 0 , 1023, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
-  Serial.println(analogWheelValue); //** Debug serial print
-          
-  controlChange(midiCh, 9, mappedWheelValue); //  (channel, CC number,  CC value)
-  MidiUSB.flush();
+//  Motor filtering math
+  int motorValue = analogRead(Motor_Pin); //* Analog pin 1 reading from circuit
+  filteredMotorValue = (Exp_Smoothing_Alpha * motorValue + oneMinusExpSmoothingAlpha * filteredMotorValue) ;
+
+  float normalizedMotorValue = (filteredMotorValue - Motor_Mid_Value)/ Motor_Range;
+
+  if (normalizedMotorValue > 1.0)
+    normalizedMotorValue = 1.0;
+   else if (normalizedMotorValue < -1.0)
+    normalizedMotorValue = -1.0;
+
+    boolean isNegative = false;
+    if (normalizedMotorValue <0) {
+      isNegative = true;
+      normalizedMotorValue = -normalizedMotorValue;
+    }
+
+   
+      
+    
+//Mapping filtered motor value to usable midi numbers.  
+//  int MappedWheelValue = map(filteredMotorValue, 900 , 980, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
+
+  if (normalizedMotorValue < 0) //* a motor value, and its 0 point
+    midiWheelCC = midiWheelCC -1;
+    if (midiWheelCC < 0)
+      midiWheelCC = 0;
+  else if (normalizedMotorValue > 0) //*a motor value and its 0 point
+    midiWheelCC = midiWheelCC + 1;
+    if (midiWheelCC > 127)
+      midiWheelCC = 127;
+//  Serial.println("FilteredMotorValue =");
+//  Serial.println( filteredMotorValue); //** Debug serial print
+//  Serial.println ("midiWheelCC = ");
+//  Serial.println (midiWheelCC);
+//  Serial.println ("NormalizedMotorValue =");
+//  Serial.println(normalizedMotorValue);
+    Serial.println("MotorValue =");
+    Serial.println(motorValue);
+  delay (2) ;
+   
+}      
+//  controlChange(midiCh, 9, mappedWheelValue); //  (channel, CC number,  CC value)
+//  MidiUSB.flush();
   
-}
