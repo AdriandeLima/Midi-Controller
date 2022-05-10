@@ -1,2 +1,2 @@
 # Midi-Controller
-Midi controller using arudino leonardo
+Midi controller using arduino leonardo
