@@ -48,7 +48,7 @@ unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the t
 #define Motor_Mid_Value 117
 #define Motor_Range 100
 #define Motor_Pin A0
-#define Exp_Smoothing_Alpha 0.05
+#define Exp_Smoothing_Alpha 0.15
 float motorLow, motorHigh ;
 float oneMinusExpSmoothingAlpha ;
 float filteredMotorValue = Motor_Mid_Value ;
@@ -214,22 +214,26 @@ void spinWheel() {
 //Mapping filtered motor value to usable midi numbers.  
 //  int MappedWheelValue = map(filteredMotorValue, 900 , 980, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
 
-  if (motorValue < 0) //* a motor value, and its 0 point
-    midiWheelCC = midiWheelCC -1;
-    if (midiWheelCC < 0)
-      midiWheelCC = 0;
-  else if (motorValue > 0) //*a motor value and its 0 point
-    midiWheelCC = midiWheelCC + 1;
-    if (midiWheelCC > 127)
-      midiWheelCC = 127;
-// Serial.println("FilteredMotorValue =");
-// Serial.println( filteredMotorValue); //** Debug serial print
+//  if (motorValue < 0) //* a motor value, and its 0 point
+//    midiWheelCC = midiWheelCC -1;
+//    if (midiWheelCC < 0)
+//      midiWheelCC = 0;
+//  else if (motorValue > 0) //*a motor value and its 0 point
+//    midiWheelCC = midiWheelCC + 1;
+//    if (midiWheelCC > 127)
+//      midiWheelCC = 127;
+
+  filteredMotorValue = float val;
+  
+  
+  Serial.println("FilteredMotorValue =");
+  Serial.println( filteredMotorValue); //** Debug serial print
 //  Serial.println ("midiWheelCC = ");
 //  Serial.println (midiWheelCC);
 //  Serial.println ("NormalizedMotorValue =");
 //  Serial.println(normalizedMotorValue);
 //    Serial.println("MotorValue =");
-   Serial.println(motorValue);
+//  Serial.println(motorValue);
   delay (2) ;
    
 }      
