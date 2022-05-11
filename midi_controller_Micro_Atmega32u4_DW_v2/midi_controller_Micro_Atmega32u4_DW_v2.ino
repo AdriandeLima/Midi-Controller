@@ -214,22 +214,22 @@ void spinWheel() {
 //Mapping filtered motor value to usable midi numbers.  
 //  int MappedWheelValue = map(filteredMotorValue, 900 , 980, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
 
-  if (normalizedMotorValue < 0) //* a motor value, and its 0 point
+  if (motorValue < 0) //* a motor value, and its 0 point
     midiWheelCC = midiWheelCC -1;
     if (midiWheelCC < 0)
       midiWheelCC = 0;
-  else if (normalizedMotorValue > 0) //*a motor value and its 0 point
+  else if (motorValue > 0) //*a motor value and its 0 point
     midiWheelCC = midiWheelCC + 1;
     if (midiWheelCC > 127)
       midiWheelCC = 127;
-//  Serial.println("FilteredMotorValue =");
-//  Serial.println( filteredMotorValue); //** Debug serial print
+// Serial.println("FilteredMotorValue =");
+// Serial.println( filteredMotorValue); //** Debug serial print
 //  Serial.println ("midiWheelCC = ");
 //  Serial.println (midiWheelCC);
 //  Serial.println ("NormalizedMotorValue =");
 //  Serial.println(normalizedMotorValue);
-    Serial.println("MotorValue =");
-    Serial.println(motorValue);
+//    Serial.println("MotorValue =");
+   Serial.println(motorValue);
   delay (2) ;
    
 }      
