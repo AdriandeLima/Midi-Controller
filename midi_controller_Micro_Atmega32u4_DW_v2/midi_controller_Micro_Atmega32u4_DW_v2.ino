@@ -54,6 +54,15 @@ float oneMinusExpSmoothingAlpha ;
 float filteredMotorValue = Motor_Mid_Value ;
 int midiWheelCC ;
 
+//Motor Smoothening
+const int numReadings = 10;
+int readings[numReadings];
+int readIndex = 0;
+int total = 0;
+int zerototal = 0;
+int average = 0;
+
+
 // MIDI Assignments 
 byte midiCh = 1; //* MIDI channel to be used
 byte note = 36; //* Lowest note to be used; 36 = C2; 60 = Middle C
@@ -78,6 +87,17 @@ void setup() {
   oneMinusExpSmoothingAlpha = 1- Exp_Smoothing_Alpha;
   midiWheelCC = 0 ;
 
+//  Motor smoothening
+  for (int thisReading = 0; thisReading<numReadings; thisReading ++){
+    readings[thisReading] = 0;
+  }
+    zerototal = zerototal-readings[readIndex];
+    readings[readIndex] = analogRead(Motor_Pin);
+    zerototal = zerototal + readings[readIndex];
+    readIndex = readIndex + 1;
+    if (readIndex == 20);
+      readIndex = 20;
+  
 }
 
 ////
@@ -208,9 +228,31 @@ void spinWheel() {
       normalizedMotorValue = -normalizedMotorValue;
     }
 
-   
+//   New Smoothening System
+    total = total-readings[readIndex];
+    readings[readIndex] = analogRead(Motor_Pin);
+    total = total + readings[readIndex];
+    readIndex = readIndex + 1;
+
+    if (readIndex >= numReadings) {
+      readIndex = 0;
+    }
+    average = total/numReadings;
+//    Serial.println(average);
+    delay(1);
       
-    
+    if (average < (zerototal - (zerototal * 0.02))) //* a motor value, and its 0 point
+      midiWheelCC = midiWheelCC -1;
+      if (midiWheelCC < 0)
+        midiWheelCC = 0;
+      else if (average > (zerototal + (zerototal * 0.02))) //*a motor value and its 0 point
+      midiWheelCC = midiWheelCC + 1;
+      if (midiWheelCC > 127)
+        midiWheelCC = 127;
+      Serial.println(midiWheelCC);
+      delay(1);
+
+      
 //Mapping filtered motor value to usable midi numbers.  
 //  int MappedWheelValue = map(filteredMotorValue, 900 , 980, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
 
@@ -223,18 +265,17 @@ void spinWheel() {
 //    if (midiWheelCC > 127)
 //      midiWheelCC = 127;
 
-  filteredMotorValue = float val;
   
   
-  Serial.println("FilteredMotorValue =");
-  Serial.println( filteredMotorValue); //** Debug serial print
+//  Serial.println("FilteredMotorValue =");
+//  Serial.println( filteredMotorValue); //** Debug serial print
 //  Serial.println ("midiWheelCC = ");
 //  Serial.println (midiWheelCC);
 //  Serial.println ("NormalizedMotorValue =");
 //  Serial.println(normalizedMotorValue);
 //    Serial.println("MotorValue =");
 //  Serial.println(motorValue);
-  delay (2) ;
+//  delay (2) ;
    
 }      
 //  controlChange(midiCh, 9, mappedWheelValue); //  (channel, CC number,  CC value)
