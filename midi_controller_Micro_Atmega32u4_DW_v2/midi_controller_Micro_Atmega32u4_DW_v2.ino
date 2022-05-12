@@ -53,6 +53,8 @@ float motorLow, motorHigh ;
 float oneMinusExpSmoothingAlpha ;
 float filteredMotorValue = Motor_Mid_Value ;
 int midiWheelCC = 64;
+int lastaverage;
+
 
 //Motor Smoothening
 const int numReadings = 10;
@@ -241,16 +243,24 @@ void spinWheel() {
 //    Serial.println(average);
     delay(1);
 //  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
-    if (average < 94) //* a motor value, and its 0 point
-      midiWheelCC = midiWheelCC -1;
-      if (midiWheelCC < 0)
-        midiWheelCC = 0;
-    else if (average > 94) //*a motor value and its 0 point
-      midiWheelCC = midiWheelCC + 1;
-      if (midiWheelCC > 127)
-        midiWheelCC = 127;
-    else if (average == 94);
-      midiWheelCC = 64;
+     if (average != lastaverage) { //* if average has changed, change midiwheelcc value
+      if (average < 94) //* a motor value, and its 0 point
+        midiWheelCC = midiWheelCC -1;
+        if (midiWheelCC < 0)
+          midiWheelCC = 0;
+      else if (average > 94) //*a motor value and its 0 point
+        midiWheelCC = midiWheelCC + 1;
+        if (midiWheelCC > 127)
+          midiWheelCC = 127;
+      else if (average == 94){; //* if average hasn't changed reset midiwheelcc
+        midiWheelCC = 64;
+      }
+     delay (10);
+     }  
+     
+     average = lastaverage;
+
+
 //    else if (average >= (zerototal - (zerototal * 0.02))&& average <= (zerototal + (zerototal * 0.02)))  ;
 //        midiWheelCC = 64;
       Serial.println(midiWheelCC);
