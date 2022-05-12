@@ -240,7 +240,7 @@ void spinWheel() {
     average = total/numReadings;
 //    Serial.println(average);
     delay(1);
-      
+//  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
     if (average < (zerototal - (zerototal * 0.02))) //* a motor value, and its 0 point
       midiWheelCC = midiWheelCC -1;
       if (midiWheelCC < 0)
