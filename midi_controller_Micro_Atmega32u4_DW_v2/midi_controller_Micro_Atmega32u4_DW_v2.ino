@@ -15,6 +15,7 @@
 #include "MIDIUSB.h"  
 #include "math.h"
 
+
 // BUTTONS
 const int NButtons = 1; //***  total number of buttons
 const int buttonPin[NButtons] = {7}; //*** define Digital Pins connected from Buttons to Arduino; (ie {10, 16, 14, 15, 6, 7, 8, 9, 2, 3, 4, 5}; 12 buttons)
@@ -26,7 +27,6 @@ int buttonPState[NButtons] = {};        // stores the button previous value
 // debounce
 unsigned long lastDebounceTime[NButtons] = {0};  // the last time the output pin was toggled
 unsigned long debounceDelay = 50;    //** the debounce time; increase if the output flickers
-
 
 // POTENTIOMETERS
 const int NPots = 0; //*** total number of pots (knobs and faders)
@@ -61,7 +61,7 @@ const int numReadings = 10;
 int readings[numReadings];
 int readIndex = 0;
 int total = 0;
-int zerototal = 0;
+//int zerototal = 0;
 int average = 0;
 
 
@@ -89,16 +89,16 @@ void setup() {
   oneMinusExpSmoothingAlpha = 1- Exp_Smoothing_Alpha;
   
 
-//  Motor smoothening
+//  Motor smoothening I DON'T THINK THIS IS USED ANYMORE
   for (int thisReading = 0; thisReading<numReadings; thisReading ++){
     readings[thisReading] = 0;
   }
-    zerototal = zerototal-readings[readIndex];
-    readings[readIndex] = analogRead(Motor_Pin);
-    zerototal = zerototal + readings[readIndex];
-    readIndex = readIndex + 1;
-    if (readIndex == 20);
-      readIndex = 20;
+//    zerototal = zerototal-readings[readIndex];
+//    readings[readIndex] = analogRead(Motor_Pin);
+//    zerototal = zerototal + readings[readIndex];
+//    readIndex = readIndex + 1;
+//    if (readIndex == 20);
+//      readIndex = 20;
   
 }
 
@@ -214,23 +214,23 @@ void controlChange(byte channel, byte control, byte value) {
 //Playhead wheel
 void spinWheel() {
 //  Motor filtering math
-  int motorValue = analogRead(Motor_Pin); //* Analog pin 1 reading from circuit
-  filteredMotorValue = (Exp_Smoothing_Alpha * motorValue + oneMinusExpSmoothingAlpha * filteredMotorValue) ;
+//  int motorValue = analogRead(Motor_Pin); //* Analog pin 1 reading from circuit
+//  filteredMotorValue = (Exp_Smoothing_Alpha * motorValue + oneMinusExpSmoothingAlpha * filteredMotorValue) ;
+//
+//  float normalizedMotorValue = (filteredMotorValue - Motor_Mid_Value)/ Motor_Range;
+//
+//  if (normalizedMotorValue > 1.0)
+//    normalizedMotorValue = 1.0;
+//   else if (normalizedMotorValue < -1.0)
+//    normalizedMotorValue = -1.0;
+//
+//    boolean isNegative = false;
+//    if (normalizedMotorValue <0) {
+//      isNegative = true;
+//      normalizedMotorValue = -normalizedMotorValue;
+//    }
 
-  float normalizedMotorValue = (filteredMotorValue - Motor_Mid_Value)/ Motor_Range;
-
-  if (normalizedMotorValue > 1.0)
-    normalizedMotorValue = 1.0;
-   else if (normalizedMotorValue < -1.0)
-    normalizedMotorValue = -1.0;
-
-    boolean isNegative = false;
-    if (normalizedMotorValue <0) {
-      isNegative = true;
-      normalizedMotorValue = -normalizedMotorValue;
-    }
-
-//   New Smoothening System
+//  Smoothening System
     total = total-readings[readIndex];
     readings[readIndex] = analogRead(Motor_Pin);
     total = total + readings[readIndex];
@@ -240,58 +240,45 @@ void spinWheel() {
       readIndex = 0;
     }
     average = (total/numReadings)/10;
-//    Serial.println(average);
+//    Serial.println(average); //*debug print for average
     delay(1);
-//  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
+    
+//  TODO need to figure out a way to make this logorhythmic, so there's some inertia, with more sensitivity, going to less   
      if (average != lastaverage) { //* if average has changed, change midiwheelcc value
-      if (average < 94) //* a motor value, and its 0 point
+
+     }
+      if (average < 94){ //* a motor value, and its 0 point
         midiWheelCC = midiWheelCC -1;
-        if (midiWheelCC < 0)
-          midiWheelCC = 0;
-      else if (average > 94) //*a motor value and its 0 point
-        midiWheelCC = midiWheelCC + 1;
-        if (midiWheelCC > 127)
-          midiWheelCC = 127;
-      else if (average == 94){; //* if average hasn't changed reset midiwheelcc
-        midiWheelCC = 64;
       }
+        if (midiWheelCC < 0){
+          midiWheelCC = 0;
+        }
+      else if (average > 94){ //*a motor value and its 0 point
+        midiWheelCC = midiWheelCC + 1;
+      }
+        if (midiWheelCC > 127){
+          midiWheelCC = 127;
+        }
+      else if (average == 94){ //* if average hasn't changed reset midiwheelcc
+//        if  { //need something here to make sure average has been 94 for a certain amount of time
+        midiWheelCC = 64; //* TODO when midiWheelCC = 0 or 127 it jumps back to 64. slow down
+        
+//      }
      delay (10);
      }  
      
      average = lastaverage;
 
-
-//    else if (average >= (zerototal - (zerototal * 0.02))&& average <= (zerototal + (zerototal * 0.02)))  ;
-//        midiWheelCC = 64;
-      Serial.println(midiWheelCC);
-      delay(1);
+     Serial.println(midiWheelCC);
+     delay(1);
 
       
-//Mapping filtered motor value to usable midi numbers.  
-//  int MappedWheelValue = map(filteredMotorValue, 900 , 980, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
-
-//  if (motorValue < 0) //* a motor value, and its 0 point
-//    midiWheelCC = midiWheelCC -1;
-//    if (midiWheelCC < 0)
-//      midiWheelCC = 0;
-//  else if (motorValue > 0) //*a motor value and its 0 point
-//    midiWheelCC = midiWheelCC + 1;
-//    if (midiWheelCC > 127)
-//      midiWheelCC = 127;
 
   
   
-//  Serial.println("FilteredMotorValue =");
-//  Serial.println( filteredMotorValue); //** Debug serial print
-//  Serial.println ("midiWheelCC = ");
-//  Serial.println (midiWheelCC);
-//  Serial.println ("NormalizedMotorValue =");
-//  Serial.println(normalizedMotorValue);
-//    Serial.println("MotorValue =");
-//  Serial.println(motorValue);
-//  delay (2) ;
+
    
-}      
-//  controlChange(midiCh, 9, mappedWheelValue); //  (channel, CC number,  CC value)
-//  MidiUSB.flush();
-  
+//  Map midiWheelCC to a midi channel and controller num.    
+  controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value)
+  MidiUSB.flush();
+} 
