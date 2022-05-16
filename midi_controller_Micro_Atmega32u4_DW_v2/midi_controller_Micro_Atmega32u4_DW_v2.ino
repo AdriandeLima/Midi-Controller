@@ -54,6 +54,7 @@ float oneMinusExpSmoothingAlpha ;
 float filteredMotorValue = Motor_Mid_Value ;
 int midiWheelCC = 64;
 int lastaverage;
+int count = 0;
 
 
 //Motor Smoothening
@@ -240,20 +241,27 @@ void spinWheel() {
       readIndex = 0;
     }
     average = (total/numReadings)/10;
-//    Serial.println(average);
+//    Serial.println(average); //*debug print
     delay(1);
 //  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
      if (average != lastaverage) { //* if average has changed, change midiwheelcc value
       if (average < 94) //* a motor value, and its 0 point
         midiWheelCC = midiWheelCC -1;
+        count = 0;
         if (midiWheelCC < 0)
           midiWheelCC = 0;
       else if (average > 94) //*a motor value and its 0 point
         midiWheelCC = midiWheelCC + 1;
+        count = 0;
         if (midiWheelCC > 127)
           midiWheelCC = 127;
       else if (average == 94){; //* if average hasn't changed reset midiwheelcc
-        midiWheelCC = 64;
+        count = count+1;
+        
+        if (count == 100);
+          delay (50);
+          midiWheelCC = 64;
+          Serial.print("Zeroed");
       }
      delay (10);
      }  
@@ -261,37 +269,14 @@ void spinWheel() {
      average = lastaverage;
 
 
-//    else if (average >= (zerototal - (zerototal * 0.02))&& average <= (zerototal + (zerototal * 0.02)))  ;
-//        midiWheelCC = 64;
+
       Serial.println(midiWheelCC);
       delay(1);
 
-      
-//Mapping filtered motor value to usable midi numbers.  
-//  int MappedWheelValue = map(filteredMotorValue, 900 , 980, 0 , 127); //* mapping analog reading to a midi value between 0 and 127
 
-//  if (motorValue < 0) //* a motor value, and its 0 point
-//    midiWheelCC = midiWheelCC -1;
-//    if (midiWheelCC < 0)
-//      midiWheelCC = 0;
-//  else if (motorValue > 0) //*a motor value and its 0 point
-//    midiWheelCC = midiWheelCC + 1;
-//    if (midiWheelCC > 127)
-//      midiWheelCC = 127;
-
-  
-  
-//  Serial.println("FilteredMotorValue =");
-//  Serial.println( filteredMotorValue); //** Debug serial print
-//  Serial.println ("midiWheelCC = ");
-//  Serial.println (midiWheelCC);
-//  Serial.println ("NormalizedMotorValue =");
-//  Serial.println(normalizedMotorValue);
-//    Serial.println("MotorValue =");
-//  Serial.println(motorValue);
-//  delay (2) ;
    
-}      
-//  controlChange(midiCh, 9, mappedWheelValue); //  (channel, CC number,  CC value)
-//  MidiUSB.flush();
+      
+  controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value)
+  MidiUSB.flush();
+}
   
