@@ -45,14 +45,9 @@ unsigned long PTime[NPots] = {}; // Previously stored time; delete 0 if 0 pots
 unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the timer was reset; delete 0 if 0 pots
 
 // Motor
-#define Motor_Mid_Value 117
-#define Motor_Range 100
 #define Motor_Pin A0
-#define Exp_Smoothing_Alpha 0.15
-float motorLow, motorHigh ;
-float oneMinusExpSmoothingAlpha ;
-float filteredMotorValue = Motor_Mid_Value ;
-int midiWheelCC = 64;
+int midiWheelCC = 0;
+int lastMidiWheelCC = 0 ;
 int lastaverage;
 
 
@@ -62,7 +57,6 @@ const int numReadings = 10;
 int readings[numReadings];
 int readIndex = 0;
 int total = 0;
-int zerototal = 0;
 int average = 0;
 
 
@@ -83,23 +77,13 @@ void setup() {
   for (int i = 0; i < NButtons; i++) {
     pinMode(buttonPin[i], INPUT_PULLUP);
   }
-  Serial.begin(9600);
-//  Motor Setup
-  motorLow = Motor_Mid_Value - Motor_Range;
-  motorHigh = Motor_Mid_Value + Motor_Range;
-  oneMinusExpSmoothingAlpha = 1- Exp_Smoothing_Alpha;
-  
+  Serial.begin(9600); 
 
 //  Motor smoothening
   for (int thisReading = 0; thisReading<numReadings; thisReading ++){
     readings[thisReading] = 0;
   }
-    zerototal = zerototal-readings[readIndex];
-    readings[readIndex] = analogRead(Motor_Pin);
-    zerototal = zerototal + readings[readIndex];
-    readIndex = readIndex + 1;
-    if (readIndex == 20);
-      readIndex = 20;
+
   
 }
 
@@ -214,22 +198,7 @@ void controlChange(byte channel, byte control, byte value) {
 
 //Playhead wheel
 void spinWheel() {
-//  Motor filtering math
-  int motorValue = analogRead(Motor_Pin); //* Analog pin 1 reading from circuit
-  filteredMotorValue = (Exp_Smoothing_Alpha * motorValue + oneMinusExpSmoothingAlpha * filteredMotorValue) ;
 
-  float normalizedMotorValue = (filteredMotorValue - Motor_Mid_Value)/ Motor_Range;
-
-  if (normalizedMotorValue > 1.0)
-    normalizedMotorValue = 1.0;
-   else if (normalizedMotorValue < -1.0)
-    normalizedMotorValue = -1.0;
-
-    boolean isNegative = false;
-    if (normalizedMotorValue <0) {
-      isNegative = true;
-      normalizedMotorValue = -normalizedMotorValue;
-    }
 
 //   New Smoothening System
     total = total-readings[readIndex];
@@ -255,14 +224,16 @@ void spinWheel() {
 
         if (midiWheelCC > 127)
           midiWheelCC = 127;
-      else if (average == 94){; //* if average hasn't changed reset midiwheelcc
 
-        
+
+
+  
+
  
-      }
-     delay (10);
-     }  
-     
+
+//     delay (10);
+   }  
+
      average = lastaverage;
 
 
@@ -270,10 +241,10 @@ void spinWheel() {
       Serial.println(midiWheelCC);
       delay(1);
 
-
+      controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value)
+      MidiUSB.flush();
    
       
-  controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value)
-  MidiUSB.flush();
+
 }
   
