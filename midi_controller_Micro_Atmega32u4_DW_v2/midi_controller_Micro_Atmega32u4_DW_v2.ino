@@ -54,7 +54,7 @@ float oneMinusExpSmoothingAlpha ;
 float filteredMotorValue = Motor_Mid_Value ;
 int midiWheelCC = 64;
 int lastaverage;
-int count = 0;
+
 
 
 //Motor Smoothening
@@ -247,21 +247,18 @@ void spinWheel() {
      if (average != lastaverage) { //* if average has changed, change midiwheelcc value
       if (average < 94) //* a motor value, and its 0 point
         midiWheelCC = midiWheelCC -1;
-        count = 0;
+
         if (midiWheelCC < 0)
           midiWheelCC = 0;
       else if (average > 94) //*a motor value and its 0 point
         midiWheelCC = midiWheelCC + 1;
-        count = 0;
+
         if (midiWheelCC > 127)
           midiWheelCC = 127;
       else if (average == 94){; //* if average hasn't changed reset midiwheelcc
-        count = count+1;
+
         
-        if (count == 100);
-          delay (50);
-          midiWheelCC = 64;
-          Serial.print("Zeroed");
+ 
       }
      delay (10);
      }  
