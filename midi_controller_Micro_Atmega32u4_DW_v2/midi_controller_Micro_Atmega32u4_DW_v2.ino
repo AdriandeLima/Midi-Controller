@@ -232,13 +232,13 @@ void spinWheel() {
      average = lastaverage;
 
 
-      Serial.println(midiWheelCC);
+//      Serial.println(midiWheelCC);
       delay(1);
 
      if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.
       controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value) (slows down operation of wheel)
       MidiUSB.flush();
-      Serial.println("Midi sent");
+      Serial.println(midiWheelCC);
      }
       
      lastMidiWheelCC = midiWheelCC; 
