@@ -49,7 +49,7 @@ unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the t
 int midiWheelCC = 0;
 int lastMidiWheelCC = 0 ;
 int lastaverage;
-int oldIntegral = 0;
+
 
 
 
@@ -212,23 +212,9 @@ void spinWheel() {
     }
     average = (total/numReadings)/10;
     
+        
     
-    //Integration test
-//    int integral;
-//    int newIntegral = analogRead(Motor_Pin);
-//      if (newIntegral > oldIntegral){
-//      integral = integral + newIntegral;
-//      oldIntegral = newIntegral;
-//      }
-//    else{
-//      integral = integral-newIntegral;
-//    }
-//    Serial.println(integral);
-//    delay(10);
-
-    
-    
-   Serial.println(average); //*debug print
+//   Serial.println(average); //*debug print
     delay(1);
 //  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
      if (average != lastaverage) { //* if average has changed, change midiwheelcc value
@@ -253,14 +239,14 @@ void spinWheel() {
 //      Serial.println(midiWheelCC);
       delay(1);
 
-//     if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.
-//      controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value) (slows down operation of wheel)
-//      MidiUSB.flush();
-//      Serial.println((pow(2.7, (midiWheelCC-4))));
+     if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.
+      controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value) (slows down operation of wheel)
+      MidiUSB.flush();
+      Serial.println((pow(2.7, (midiWheelCC-4))));
      }
       
-//     lastMidiWheelCC = midiWheelCC; 
+     lastMidiWheelCC = midiWheelCC; 
       
 
-//}
+}
   
