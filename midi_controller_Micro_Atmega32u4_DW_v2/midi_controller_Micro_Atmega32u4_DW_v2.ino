@@ -210,7 +210,24 @@ void spinWheel() {
       readIndex = 0;
     }
     average = (total/numReadings)/10;
-//    Serial.println(average); //*debug print
+    
+    
+    //Integration test
+//    int integral;
+//    int newIntegral = analogRead(Motor_Pin);
+//      if (newIntegral > oldIntegral){
+//      integral = integral + newIntegral;
+//      oldIntegral = newIntegral;
+//      }
+//    else{
+//      integral = integral-newIntegral;
+//    }
+//    Serial.println(integral);
+//    delay(10);
+
+    
+    
+   Serial.println(average); //*debug print
     delay(1);
 //  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
      if (average != lastaverage) { //* if average has changed, change midiwheelcc value
