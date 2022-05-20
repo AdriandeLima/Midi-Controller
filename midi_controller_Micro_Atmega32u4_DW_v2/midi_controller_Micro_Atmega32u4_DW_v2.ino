@@ -4,7 +4,7 @@
 
   This code is only for Arduinos that use ATmega32u4 (like Micro, Pro Micro, Leonardo...)
   Remember to also assign the correct board in the IDE (like Tools / Boards / Sparkfun AVR / Pro Micro...)
-
+ If a number is "stuck" e.g. 127, check that the motor isn't loose.
 */
 
 // Change any fields with //**
@@ -49,6 +49,7 @@ unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the t
 int midiWheelCC = 0;
 int lastMidiWheelCC = 0 ;
 int lastaverage;
+int oldIntegral = 0;
 
 
 
@@ -252,14 +253,14 @@ void spinWheel() {
 //      Serial.println(midiWheelCC);
       delay(1);
 
-     if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.
-      controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value) (slows down operation of wheel)
-      MidiUSB.flush();
-      Serial.println(midiWheelCC);
+//     if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.
+//      controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value) (slows down operation of wheel)
+//      MidiUSB.flush();
+//      Serial.println((pow(2.7, (midiWheelCC-4))));
      }
       
-     lastMidiWheelCC = midiWheelCC; 
+//     lastMidiWheelCC = midiWheelCC; 
       
 
-}
+//}
   
