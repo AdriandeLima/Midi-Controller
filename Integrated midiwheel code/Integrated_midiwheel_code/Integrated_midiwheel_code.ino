@@ -6,7 +6,7 @@
 int Integral;
 int aVal;
 int lastMidiIntegral;
-#define zeroOffset 344
+#define zeroOffset 517
 
 void setup() {
   Serial.begin(115200);
@@ -14,7 +14,7 @@ void setup() {
 
 void loop() {
   aVal = (analogRead(A0) -zeroOffset);
-  Integral += aVal/4;
+  Integral += aVal/2;
   Serial.print(analogRead(A0) -zeroOffset); //What's this for?
   Serial.print("  ");
 //  Serial.println(Integral);
@@ -30,7 +30,7 @@ void loop() {
   }
   
   Serial.println(midiIntegral);
-  delay(100);
+  delay(10);
   if(midiIntegral != lastMidiIntegral){
   controlChange(2, 9, midiIntegral); //  (channel, CC number,  CC value) (slows down operation of wheel)
   MidiUSB.flush();
