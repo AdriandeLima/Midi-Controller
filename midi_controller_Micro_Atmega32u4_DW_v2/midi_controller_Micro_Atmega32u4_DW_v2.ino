@@ -46,19 +46,22 @@ unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the t
 
 // Motor
 #define Motor_Pin A0
-int midiWheelCC = 0;
-int lastMidiWheelCC = 0 ;
-int lastaverage;
+int midiWheelCC;
+int lastMidiWheelCC;
+int Integral;
+int aVal;
+#define zeroOffset 517
+//int lastaverage;
 
 
 
 
 //Motor Smoothening
-const int numReadings = 10;
-int readings[numReadings];
-int readIndex = 0;
-int total = 0;
-int average = 0;
+//const int numReadings = 10;
+//int readings[numReadings];
+//int readIndex = 0;
+//int total = 0;
+//int average = 0;
 
 
 // MIDI Assignments 
@@ -78,12 +81,12 @@ void setup() {
   for (int i = 0; i < NButtons; i++) {
     pinMode(buttonPin[i], INPUT_PULLUP);
   }
-  Serial.begin(9600); 
+  Serial.begin(115200); 
 
 //  Motor smoothening
-  for (int thisReading = 0; thisReading<numReadings; thisReading ++){
-    readings[thisReading] = 0;
-  }
+//  for (int thisReading = 0; thisReading<numReadings; thisReading ++){
+//    readings[thisReading] = 0;
+//  }
 
   
 }
@@ -201,48 +204,68 @@ void controlChange(byte channel, byte control, byte value) {
 void spinWheel() {
 
 
-//   New Smoothening System
-    total = total-readings[readIndex];
-    readings[readIndex] = analogRead(Motor_Pin);
-    total = total + readings[readIndex];
-    readIndex = readIndex + 1;
+////   New Smoothening System
+//    total = total-readings[readIndex];
+//    readings[readIndex] = analogRead(Motor_Pin);
+//    total = total + readings[readIndex];
+//    readIndex = readIndex + 1;
+//
+//    if (readIndex >= numReadings) {
+//      readIndex = 0;
+//    }
+//    average = (total/numReadings)/10;
+//    
+//        
+//    
+////   Serial.println(average); //*debug print
+//    delay(1);
+////  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
+//     if (average != lastaverage) { //* if average has changed, change midiwheelcc value
+//      if (average < 94) //* a motor value, and its 0 point
+//        midiWheelCC = midiWheelCC -1;
+//
+//        if (midiWheelCC < 0)
+//          midiWheelCC = 0;
+//      else if (average > 94) //*a motor value and its 0 point
+//        midiWheelCC = midiWheelCC + 1;
+//
+//        if (midiWheelCC > 127)
+//          midiWheelCC = 127;
+//
+//
+//
+//   }  
+//
+//     average = lastaverage;
 
-    if (readIndex >= numReadings) {
-      readIndex = 0;
-    }
-    average = (total/numReadings)/10;
-    
-        
-    
-//   Serial.println(average); //*debug print
-    delay(1);
-//  need to figure out a way to make this logorhythmic, and how to go back down to 0 once I stop spinning. Also how to stop floating voltages    
-     if (average != lastaverage) { //* if average has changed, change midiwheelcc value
-      if (average < 94) //* a motor value, and its 0 point
-        midiWheelCC = midiWheelCC -1;
+//Integration system
 
-        if (midiWheelCC < 0)
-          midiWheelCC = 0;
-      else if (average > 94) //*a motor value and its 0 point
-        midiWheelCC = midiWheelCC + 1;
+  aVal = (analogRead(A0) -zeroOffset);
+  Integral += aVal/2;
+  Serial.print(analogRead(A0) -zeroOffset); 
+  Serial.print("  ");
+//  Serial.println(Integral);
+  delay(100);
 
-        if (midiWheelCC > 127)
-          midiWheelCC = 127;
+  int midiWheelCC = map(Integral,0, 1023, 0, 127);
+//  constrain(midiWheelCC, 0, 127);
+  if (midiWheelCC>127){
+    midiWheelCC = 127;
+  }
+  else if (midiWheelCC <0){
+    midiWheelCC =0;
+  }
 
-
-
-   }  
-
-     average = lastaverage;
-
+  Serial.println(midiWheelCC);
+  delay(10);
 
 //      Serial.println(midiWheelCC);
-      delay(1);
+//      delay(1);
 
      if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.
       controlChange(midiCh, 9, midiWheelCC); //  (channel, CC number,  CC value) (slows down operation of wheel)
       MidiUSB.flush();
-      Serial.println((pow(2.7, (midiWheelCC-4))));
+//      Serial.println((pow(2.7, (midiWheelCC-4))));
      }
       
      lastMidiWheelCC = midiWheelCC; 
