@@ -16,8 +16,8 @@
 #include "math.h"
 
 // BUTTONS
-const int NButtons = 1; //***  total number of buttons
-const int buttonPin[NButtons] = {7}; //*** define Digital Pins connected from Buttons to Arduino; (ie {10, 16, 14, 15, 6, 7, 8, 9, 2, 3, 4, 5}; 12 buttons)
+const int NButtons = 6; //***  total number of buttons
+const int buttonPin[NButtons] = {10,3,2,A1,5,7}; //*** define Digital Pins connected from Buttons to Arduino; (ie {10, 16, 14, 15, 6, 7, 8, 9, 2, 3, 4, 5}; 12 buttons)
                                             
 int buttonCState[NButtons] = {};        // stores the button current value
 int buttonPState[NButtons] = {};        // stores the button previous value
@@ -29,20 +29,20 @@ unsigned long debounceDelay = 50;    //** the debounce time; increase if the out
 
 
 // POTENTIOMETERS
-const int NPots = 0; //*** total number of pots (knobs and faders)
-const int potPin[NPots] = {}; //*** define Analog Pins connected from Pots to Arduino; Leave nothing in the array if 0 pots {}
-int potCState[NPots] = {}; // Current state of the pot; delete 0 if 0 pots
-int potPState[NPots] = {}; // Previous state of the pot; delete 0 if 0 pots
+const int NPots = 5; //*** total number of pots (knobs and faders)
+const int potPin[NPots] = {A2,6,7,8,9}; //*** define Analog Pins connected from Pots to Arduino; Leave nothing in the array if 0 pots {}
+int potCState[NPots] = {0}; // Current state of the pot; delete 0 if 0 pots
+int potPState[NPots] = {0}; // Previous state of the pot; delete 0 if 0 pots
 int potVar = 0; // Difference between the current and previous state of the pot
 
-int midiCState[NPots] = {}; // Current state of the midi value; delete 0 if 0 pots
-int midiPState[NPots] = {}; // Previous state of the midi value; delete 0 if 0 pots
+int midiCState[NPots] = {0}; // Current state of the midi value; delete 0 if 0 pots
+int midiPState[NPots] = {0}; // Previous state of the midi value; delete 0 if 0 pots
 
 const int TIMEOUT = 300; //* Amount of time the potentiometer will be read after it exceeds the varThreshold
 const int varThreshold = 10; //* Threshold for the potentiometer signal variation
 boolean potMoving = true; // If the potentiometer is moving
-unsigned long PTime[NPots] = {}; // Previously stored time; delete 0 if 0 pots
-unsigned long timer[NPots] = {}; // Stores the time that has elapsed since the timer was reset; delete 0 if 0 pots
+unsigned long PTime[NPots] = {0}; // Previously stored time; delete 0 if 0 pots
+unsigned long timer[NPots] = {0}; // Stores the time that has elapsed since the timer was reset; delete 0 if 0 pots
 
 // Motor
 #define Motor_Pin A0
@@ -50,13 +50,13 @@ int midiWheelCC;
 int lastMidiWheelCC;
 int Integral;
 int aVal;
-#define zeroOffset 517
+#define zeroOffset 513
 
 
 // MIDI Assignments 
 byte midiCh = 1; //* MIDI channel to be used
 byte note = 36; //* Lowest note to be used; 36 = C2; 60 = Middle C
-byte cc = 9; //* Lowest MIDI CC to be used
+byte cc = 20; //* Lowest MIDI CC to be used
 
 
 // SETUP
@@ -80,8 +80,8 @@ void setup() {
 // LOOP
 void loop() {
 
-//  buttons();
-//  potentiometers();
+  buttons();
+  potentiometers();
   spinWheel();
 
 }
@@ -160,9 +160,10 @@ void potentiometers() {
 
         potPState[i] = potCState[i]; // Stores the current reading of the potentiometer to compare with the next
         midiPState[i] = midiCState[i];
+        
       }
     }
-  }
+  }  
 }
 
 
@@ -205,7 +206,7 @@ void spinWheel() {
     midiWheelCC =0;
   }
 
-  Serial.println(midiWheelCC);
+//  Serial.println(midiWheelCC);
   delay(10);
 
   if (lastMidiWheelCC != midiWheelCC) { // Sends a midi message so long as the midiwheel value has changed.

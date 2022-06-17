@@ -15,7 +15,7 @@ void setup() {
 void loop() {
   aVal = (analogRead(A0) -zeroOffset);
   Integral += aVal/2;
-  Serial.print(analogRead(A0) -zeroOffset); //What's this for?
+  Serial.print(analogRead(A0) -zeroOffset); 
   Serial.print("  ");
 //  Serial.println(Integral);
   delay(100);
