@@ -55,7 +55,8 @@ int aVal;
 
 // MIDI Assignments 
 byte midiCh = 1; //* MIDI channel to be used
-byte note = 36; //* Lowest note to be used; 36 = C2; 60 = Middle C
+byte potMidiCh = 2;
+//byte note = 36; //* Lowest note to be used; 36 = C2; 60 = Middle C
 byte cc = 20; //* Lowest MIDI CC to be used
 
 
@@ -104,7 +105,7 @@ void buttons() {
           // Sends the MIDI note ON 
           
          // use if using with ATmega32U4 (micro, pro micro, leonardo...)
-          noteOn(midiCh, cc + i, 127);  // channel, note, velocity
+          controlChange(midiCh, cc + i, 127);  // channel, note, velocity
           MidiUSB.flush();
 
 
@@ -114,7 +115,7 @@ void buttons() {
           // Sends the MIDI note OFF accordingly to the chosen board
 
           // use if using with ATmega32U4 (micro, pro micro, leonardo...)
-          noteOn(midiCh, cc + i, 0);  // channel, note, velocity
+          controlChange(midiCh, cc + i, 0);  // channel, note, velocity
           MidiUSB.flush();
 
         }
@@ -155,7 +156,7 @@ void potentiometers() {
 
         // Sends  MIDI CC 
         // Use if using with ATmega32U4 (micro, pro micro, leonardo...)
-        controlChange(midiCh, cc + i, midiCState[i]); //  (channel, CC number,  CC value)
+        controlChange(potMidiCh, cc + i, midiCState[i]); //  (channel, CC number,  CC value)
         MidiUSB.flush();
 
         potPState[i] = potCState[i]; // Stores the current reading of the potentiometer to compare with the next
